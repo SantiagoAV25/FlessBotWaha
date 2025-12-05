@@ -32,10 +32,10 @@ RUN yarn build && find ./dist -name "*.d.ts" -delete
 FROM node:${NODE_IMAGE_TAG} AS dashboard
 
 # jq to parse json
-RUN apt-get update && apt-get install -y jq && rm -rf /var/lib/apt/lists/*
+RUN  apt-get update && apt-get install -y jq && rm -rf /var/lib/apt/lists/*
 
 # wget, unzip
-RUN apt-get update && apt-get install -y wget unzip && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget unzip --fix-missing && rm -rf /var/lib/apt/lists/*
 
 COPY waha.config.json /tmp/waha.config.json
 RUN \
@@ -221,6 +221,7 @@ ENV WAHA_GOWS_PATH=/app/gows
 ENV WAHA_GOWS_SOCKET=/tmp/gows.sock
 
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Chokidar options to monitor file changes
 ENV CHOKIDAR_USEPOLLING=1

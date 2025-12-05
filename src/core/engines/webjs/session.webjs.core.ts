@@ -148,7 +148,7 @@ import {
   Message,
   MessageMedia,
   Reaction,
-  WAState,
+  WAState
 } from 'whatsapp-web.js';
 import { Message as MessageInstance } from 'whatsapp-web.js/src/structures';
 
@@ -715,12 +715,36 @@ export class WhatsappSessionWebJSCore extends WhatsappSession {
     );
   }
 
-  sendImage(request: MessageImageRequest) {
-    throw new AvailableInPlusVersion();
+  @Activity()
+  async sendImage(request: MessageImageRequest) {
+    const options = this.getMessageOptions(request);
+    options.caption = request.caption; 
+
+    let media: MessageMedia;
+      // Caso URL (RemoteFile)
+  if ("url" in request.file) {
+    media = await MessageMedia.fromUrl(request.file.url);
+  }
+  // Caso Base64 (BinaryFile)
+ else if ("base64" in request.file) {
+  const base64 = String(request.file.base64); // <-- Convierte unknown → string
+
+  media = new MessageMedia(
+    request.file.mimetype,
+    base64,
+    request.file.filename
+
+  );
+} else {
+    throw new Error("Invalid file type: expected url or base64");
+  }
+
+  return this.whatsapp.sendMessage(this.ensureSuffix(request.chatId),media,options);
+  
   }
 
   sendFile(request: MessageFileRequest) {
-    throw new AvailableInPlusVersion();
+    
   }
 
   sendVoice(request: MessageVoiceRequest) {
